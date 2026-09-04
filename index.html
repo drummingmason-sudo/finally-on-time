@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Finally On Time" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>Finally On Time</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #111111;
+      --surface2: #1c1c1e;
+      --border: #2c2c2e;
+      --text: #ffffff;
+      --muted: #8e8e93;
+      --muted2: #636366;
+      --accent: #ffffff;
+      --radius: 14px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html { background: var(--bg); }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior-y: none;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-top: calc(16px + var(--safe-top));
+      padding-bottom: calc(100px + var(--safe-bottom));
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-top: 12px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
+
+    .local-clock {
+      font-size: 0.8rem;
+      color: var(--muted2);
+      margin-top: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .time-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .time-row label {
+      flex: 1;
+      min-width: 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    input[type="time"],
+    input[type="number"],
+    input[type="text"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 1rem;
+      width: 100%;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input:focus {
+      border-color: #ffffff;
+    }
+
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.6;
+    }
+
+    .computed-leave {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .computed-leave strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .status {
+      text-align: center;
+      padding: 28px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .status.leave-now {
+      background: #1a1a1a;
+      border-color: #ffffff;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    .status.start-prep {
+      border-color: #8e8e93;
+      background: #141414;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.015); opacity: 0.95; }
+    }
+
+    .status .label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status .time {
+      font-size: 3rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+    }
+
+    .status .sub {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .active-routine {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .active-routine strong {
+      color: var(--text);
+    }
+
+    .step {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border: 1px solid transparent;
+    }
+
+    .step.active {
+      border-color: #ffffff;
+      background: #1a1a1a;
+    }
+
+    .step.done { opacity: 0.45; }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .step.active .step-num {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .step.done .step-num {
+      background: #636366;
+      color: #000000;
+    }
+
+    .step-info { flex: 1; min-width: 0; }
+
+    .step-name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .step-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .step-duration {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      padding: 4px 10px;
+      background: var(--border);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: var(--text);
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      border: 1px solid transparent;
+    }
+
+    .step-duration:active {
+      border-color: #ffffff;
+      background: #2c2c2e;
+    }
+
+    .step-actions { display: flex; gap: 2px; }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      touch-action: manipulation;
+    }
+
+    .icon-btn:active {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .checklist {
+      margin-top: 12px;
+      padding-left: 38px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      font-size: 0.95rem;
+      min-height: 44px;
+    }
+
+    .check-item input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      border: 2px solid var(--muted);
+      border-radius: 6px;
+      background: transparent;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .check-item input[type="checkbox"]:checked {
+      background: #ffffff;
+      border-color: #ffffff;
+    }
+
+    .check-item input[type="checkbox"]:checked::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 2px;
+      width: 5px;
+      height: 10px;
+      border: solid #000;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .check-item label {
+      flex: 1;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .check-item.checked label {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .check-item .remove-check { opacity: 0.35; }
+
+    .add-check {
+      margin-top: 6px;
+      padding-left: 38px;
+    }
+
+    .add-check input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+
+    .btn {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      touch-action: manipulation;
+      min-height: 48px;
+      -webkit-appearance: none;
+    }
+
+    .btn:active { opacity: 0.85; }
+
+    .btn.secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn.secondary:active { background: var(--border); }
+
+    .btn.block {
+      width: 100%;
+      padding: 16px;
+      font-size: 1rem;
+    }
+
+    .btn.small {
+      min-height: 40px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+    }
+
+    .add-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .add-form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .add-form-row input[type="text"] { flex: 1; }
+    .add-form-row input[type="number"] { width: 88px; }
+
+    .empty {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .footer-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, #000 65%, transparent);
+      padding: 16px;
+      padding-bottom: calc(16px + var(--safe-bottom));
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .footer-actions .btn {
+      pointer-events: auto;
+      max-width: 480px;
+      flex: 1;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: var(--muted2);
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    .reorder {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .reorder .icon-btn {
+      height: 24px;
+      font-size: 0.7rem;
+      width: 28px;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .routine-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .routine-item.active-r {
+      border-color: #ffffff;
+    }
+
+    .routine-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .routine-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .routine-meta {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .routine-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .save-routine-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .save-routine-row input {
+      flex: 1;
+    }
+
+    @media screen and (max-width: 480px) {
+      input[type="time"],
+      input[type="number"],
+      input[type="text"] {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Finally On Time</h1>
+      <p>Prep timers + checklists. Leave when travel starts.</p>
+      <div class="local-clock" id="localClock">Local time: --:--</div>
+    </header>
+
+    <div class="card">
+      <div class="card-title">When do you need to arrive?</div>
+      <div class="time-row">
+        <label>
+          Arrival
+          <input type="time" id="arrivalTime" />
+        </label>
+        <label style="flex: 0.65;">
+          Travel (min)
+          <input type="number" id="travelMin" value="20" min="0" max="300" inputmode="numeric" />
+        </label>
+        <label style="flex: 0.55;">
+          Buffer
+          <input type="number" id="bufferMin" value="5" min="0" max="60" inputmode="numeric" />
+        </label>
+      </div>
+      <div class="computed-leave" id="computedLeave">
+        Leave by: <strong>--</strong>
+      </div>
+      <p class="hint">Leave = arrival − travel. Buffer is padding before you walk out.</p>
+    </div>
+
+    <div class="status" id="statusBox">
+      <div class="label" id="statusLabel">Set arrival time</div>
+      <div class="time" id="statusTime">--:--</div>
+      <div class="sub" id="statusSub"></div>
+    </div>
+
+    <!-- Saved routines -->
+    <div class="card">
+      <div class="card-title">Saved routines</div>
+      <div id="routinesList"></div>
+      <div class="save-routine-row">
+        <input type="text" id="newRoutineName" placeholder="Name this routine…" maxlength="40" autocomplete="off" />
+        <button class="btn small secondary" type="button" id="saveRoutineBtn">Save</button>
+      </div>
+      <p class="hint">Save the current steps as a reusable routine (Gym, Work, Class, Bed…).</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Prep steps</div>
+      <div class="active-routine" id="activeRoutineLabel">Current: <strong>Untitled</strong></div>
+      <div id="stepsList"></div>
+
+      <div class="add-form" style="margin-top: 12px;">
+        <div class="add-form-row">
+          <input type="text" id="newStepName" placeholder="Step name (e.g. Shower)" maxlength="40" autocomplete="off" />
+          <input type="number" id="newStepMin" placeholder="min" min="1" max="180" value="10" inputmode="numeric" />
+        </div>
+        <button class="btn secondary block" id="addStepBtn" type="button">+ Add step</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quick start &amp; reset</div>
+      <div class="chip-row">
+        <button class="btn secondary small" type="button" data-template="morning">Morning out</button>
+        <button class="btn secondary small" type="button" data-template="gym">Gym</button>
+        <button class="btn secondary small" type="button" data-template="work">Work</button>
+        <button class="btn secondary small" type="button" data-template="class">College class</button>
+        <button class="btn secondary small" type="button" data-template="bed">Going to bed</button>
+        <button class="btn secondary small" type="button" data-template="clear">Clear steps</button>
+      </div>
+      <div style="margin-top: 10px;">
+        <button class="btn secondary small" type="button" id="resetChecksBtn">Reset checklists today</button>
+      </div>
+      <p class="hint">Templates load into the current steps. Save them as a named routine to keep them forever.</p>
+    </div>
+  </div>
+
+  <div class="footer-actions">
+    <button class="btn block" type="button" id="startBtn">Enable notifications</button>
+  </div>
+
+  <script>
+    let steps = [];
+    let routines = []; // { id, name, steps: [{name, minutes, checks: [text]}] }
+    let activeRoutineId = null;
+    let activeRoutineName = "Untitled";
+    let arrivalTimeStr = "";
+    let travelMin = 20;
+    let bufferMin = 5;
+    let tickInterval = null;
+    let leaveTimestamp = null;
+    let arrivalTimestamp = null;
+    let notifiedStartPrep = false;
+    let notifiedLeave = false;
+    let lastSavedDate = null;
+
+    const STORAGE_KEY = "finally-on-time";
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+
+    function todayKey() {
+      const d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    function uid() {
+      return Math.random().toString(36).slice(2, 9);
+    }
+
+    function cloneStepsForSave(src) {
+      return (src || []).map(s => ({
+        name: s.name,
+        minutes: s.minutes,
+        checks: (s.checks || []).map(c => (typeof c === "string" ? c : c.text))
+      }));
+    }
+
+    function stepsFromSaved(savedSteps) {
+      return (savedSteps || []).map(s => ({
+        id: uid(),
+        name: s.name,
+        minutes: s.minutes,
+        checks: (s.checks || []).map(txt => ({
+          id: uid(),
+          text: typeof txt === "string" ? txt : txt.text,
+          done: false
+        }))
+      }));
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        steps,
+        routines,
+        activeRoutineId,
+        activeRoutineName,
+        arrivalTimeStr,
+        travelMin,
+        bufferMin,
+        lastSavedDate: todayKey()
+      }));
+    }
+
+    function resetChecklists() {
+      steps.forEach(s => {
+        if (s.checks) s.checks.forEach(c => { c.done = false; });
+      });
+      notifiedStartPrep = false;
+      notifiedLeave = false;
+    }
+
+    function load() {
+      try {
+        let raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          const old = localStorage.getItem("almost-ready");
+          if (old) {
+            raw = old;
+            localStorage.setItem(STORAGE_KEY, old);
+          }
+        }
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        steps = data.steps || [];
+        routines = data.routines || [];
+        activeRoutineId = data.activeRoutineId || null;
+        activeRoutineName = data.activeRoutineName || "Untitled";
+        arrivalTimeStr = data.arrivalTimeStr || data.leaveTimeStr || "";
+        travelMin = data.travelMin ?? 20;
+        bufferMin = data.bufferMin ?? 5;
+        lastSavedDate = data.lastSavedDate || null;
+
+        const today = todayKey();
+        if (lastSavedDate && lastSavedDate !== today) {
+          resetChecklists();
+          lastSavedDate = today;
+        }
+
+        if (arrivalTimeStr) $("#arrivalTime").value = arrivalTimeStr;
+        $("#travelMin").value = travelMin;
+        $("#bufferMin").value = bufferMin;
+      } catch (e) {}
+    }
+
+    function parseTimeTodayOrTomorrow(timeStr) {
+      if (!timeStr) return null;
+      const [h, m] = timeStr.split(":").map(Number);
+      const now = new Date();
+      const t = new Date(now);
+      t.setHours(h, m, 0, 0);
+      if (t <= now) t.setDate(t.getDate() + 1);
+      return t;
+    }
+
+    function computeTimes() {
+      arrivalTimestamp = parseTimeTodayOrTomorrow(arrivalTimeStr || $("#arrivalTime").value);
+      if (!arrivalTimestamp) {
+        leaveTimestamp = null;
+        return;
+      }
+      const travel = (Number(travelMin) || 0) * 60 * 1000;
+      leaveTimestamp = new Date(arrivalTimestamp.getTime() - travel);
+    }
+
+    function formatRemaining(ms) {
+      if (ms <= 0) return "0:00";
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      return `${m}:${String(s).padStart(2, "0")}`;
+    }
+
+    function formatClock(date) {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function totalPrepMinutes() {
+      return steps.reduce((sum, s) => sum + (s.minutes || 0), 0) + (Number(bufferMin) || 0);
+    }
+
+    function notify(title, body) {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "granted") {
+        try { new Notification(title, { body, silent: false }); } catch (e) {}
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function renderRoutines() {
+      const list = $("#routinesList");
+      if (!routines.length) {
+        list.innerHTML = `<div class="empty" style="padding:16px;">No saved routines yet.</div>`;
+        return;
+      }
+      list.innerHTML = routines.map(r => {
+        const mins = (r.steps || []).reduce((s, x) => s + (x.minutes || 0), 0);
+        const n = (r.steps || []).length;
+        const isActive = r.id === activeRoutineId;
+        return `
+          <div class="routine-item ${isActive ? "active-r" : ""}" data-rid="${r.id}">
+            <div class="routine-info">
+              <div class="routine-name">${escapeHtml(r.name)}</div>
+              <div class="routine-meta">${n} step${n === 1 ? "" : "s"} · ${mins} min</div>
+            </div>
+            <div class="routine-actions">
+              <button class="btn small secondary" type="button" data-raction="load">Load</button>
+              <button class="btn small secondary" type="button" data-raction="overwrite" title="Update with current steps">↻</button>
+              <button class="icon-btn" type="button" data-raction="delete" aria-label="Delete">×</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderSteps() {
+      const list = $("#stepsList");
+      $("#activeRoutineLabel").innerHTML = `Current: <strong>${escapeHtml(activeRoutineName || "Untitled")}</strong>`;
+
+      if (!steps.length) {
+        list.innerHTML = `<div class="empty">No steps yet. Load a routine or add steps.</div>`;
+        return;
+      }
+
+      list.innerHTML = steps.map((step, idx) => {
+        const checksHtml = (step.checks || []).map(c => `
+          <div class="check-item ${c.done ? "checked" : ""}" data-step="${step.id}" data-check="${c.id}">
+            <input type="checkbox" ${c.done ? "checked" : ""} id="c-${c.id}" />
+            <label for="c-${c.id}">${escapeHtml(c.text)}</label>
+            <button class="icon-btn remove-check" data-action="remove-check" type="button" aria-label="Remove">×</button>
+          </div>
+        `).join("");
+
+        return `
+          <div class="step" data-id="${step.id}" id="step-${step.id}">
+            <div class="step-header">
+              <div class="reorder">
+                <button class="icon-btn" data-action="up" type="button" aria-label="Move up">▲</button>
+                <button class="icon-btn" data-action="down" type="button" aria-label="Move down">▼</button>
+              </div>
+              <div class="step-num">${idx + 1}</div>
+              <div class="step-info">
+                <div class="step-name">${escapeHtml(step.name)}</div>
+                <button class="step-duration" type="button" data-action="edit-duration" aria-label="Edit duration">${step.minutes} min</button>
+              </div>
+              <div class="step-actions">
+                <button class="icon-btn" data-action="edit" type="button" aria-label="Edit name">✎</button>
+                <button class="icon-btn" data-action="delete" type="button" aria-label="Delete">×</button>
+              </div>
+            </div>
+            <div class="checklist">
+              ${checksHtml}
+              <div class="add-check">
+                <input type="text" placeholder="Add checklist item…" data-step="${step.id}" maxlength="50" autocomplete="off" />
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function updateComputedLeave() {
+      computeTimes();
+      const el = $("#computedLeave");
+      if (!leaveTimestamp) {
+        el.innerHTML = "Leave by: <strong>--</strong>";
+        return;
+      }
+      el.innerHTML = `Leave by: <strong>${formatClock(leaveTimestamp)}</strong>
+        <span style="opacity:0.65"> · arrive ${formatClock(arrivalTimestamp)} · ${travelMin} min travel</span>`;
+    }
+
+    function updateLocalClock() {
+      const now = new Date();
+      $("#localClock").textContent = "Local time: " + now.toLocaleTimeString([], {
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      });
+    }
+
+    function updateStatus() {
+      const box = $("#statusBox");
+      const label = $("#statusLabel");
+      const timeEl = $("#statusTime");
+      const sub = $("#statusSub");
+
+      updateLocalClock();
+      updateComputedLeave();
+      computeTimes();
+
+      const today = todayKey();
+      if (lastSavedDate && lastSavedDate !== today) {
+        resetChecklists();
+        lastSavedDate = today;
+        save();
+        renderSteps();
+      }
+
+      if (!leaveTimestamp || !arrivalTimestamp) {
+        box.classList.remove("leave-now", "start-prep");
+        label.textContent = "Set arrival time";
+        timeEl.textContent = "--:--";
+        sub.textContent = "";
+        return;
+      }
+
+      const now = Date.now();
+      const leaveMs = leaveTimestamp.getTime();
+      const remainingToLeave = leaveMs - now;
+      const totalPrep = totalPrepMinutes() * 60 * 1000;
+      const startPrep = leaveMs - totalPrep;
+
+      if (now >= startPrep && now < startPrep + 2000 && !notifiedStartPrep) {
+        notifiedStartPrep = true;
+        notify("Finally On Time", "Time to start your prep routine.");
+      }
+      if (remainingToLeave <= 0 && remainingToLeave > -3000 && !notifiedLeave) {
+        notifiedLeave = true;
+        notify("Finally On Time", "Leave now — travel time has started.");
+      }
+
+      if (remainingToLeave <= 0) {
+        box.classList.add("leave-now");
+        box.classList.remove("start-prep");
+        label.textContent = "Leave now";
+        timeEl.textContent = "0:00";
+        sub.textContent = `Travel started. Arrive by ${formatClock(arrivalTimestamp)}.`;
+        $$(".step").forEach(el => {
+          el.classList.remove("active");
+          el.classList.add("done");
+        });
+        return;
+      }
+
+      box.classList.remove("leave-now");
+
+      if (now < startPrep) {
+        box.classList.remove("start-prep");
+        label.textContent = "Until prep starts";
+        timeEl.textContent = formatRemaining(startPrep - now);
+        sub.textContent = `Leave ${formatClock(leaveTimestamp)} · arrive ${formatClock(arrivalTimestamp)} · ${totalPrepMinutes()} min prep`;
+        $$(".step").forEach(el => el.classList.remove("active", "done"));
+      } else {
+        let cursor = startPrep;
+        let current = null;
+        let stepRemaining = 0;
+
+        for (const step of steps) {
+          const end = cursor + step.minutes * 60 * 1000;
+          if (now < end) {
+            current = step;
+            stepRemaining = end - now;
+            break;
+          }
+          cursor = end;
+        }
+
+        if (!current) {
+          box.classList.add("start-prep");
+          label.textContent = "Buffer / final check";
+          timeEl.textContent = formatRemaining(remainingToLeave);
+          sub.textContent = `Leave at ${formatClock(leaveTimestamp)}`;
+          $$(".step").forEach(el => {
+            el.classList.remove("active");
+            el.classList.add("done");
+          });
+          return;
+        }
+
+        box.classList.remove("start-prep");
+        label.textContent = current.name;
+        timeEl.textContent = formatRemaining(stepRemaining);
+        sub.textContent = `Leave in ${formatRemaining(remainingToLeave)} · arrive ${formatClock(arrivalTimestamp)}`;
+
+        let found = false;
+        $$(".step").forEach(el => {
+          const id = el.dataset.id;
+          const s = steps.find(x => x.id === id);
+          el.classList.remove("active", "done");
+          if (!s) return;
+          if (s.id === current.id) {
+            el.classList.add("active");
+            found = true;
+          } else if (!found) {
+            el.classList.add("done");
+          }
+        });
+      }
+    }
+
+    // ---- Steps ----
+    function addStep(name, minutes) {
+      name = (name || "").trim();
+      minutes = Math.max(1, Math.min(180, Number(minutes) || 10));
+      if (!name) return;
+      steps.push({ id: uid(), name, minutes, checks: [] });
+      save();
+      renderSteps();
+      updateStatus();
+    }
+
+    function deleteStep(id) {
+      steps = steps.filter(s => s.id !== id);
+      save();
+      renderSteps();
+      updateStatus();
+    }
+
+    function moveStep(id, dir) {
+      const idx = steps.findIndex(s => s.id === id);
+      if (idx < 0) return;
+      const newIdx = idx + dir;
+      if (newIdx < 0 || newIdx >= steps.length) return;
+      const [item] = steps.splice(idx, 1);
+      steps.splice(newIdx, 0, item);
+      save();
+      renderSteps();
+      updateStatus();
+    }
+
+    function addCheck(stepId, text) {
+      text = (text || "").trim();
+      if (!text) return;
+      const step = steps.find(s => s.id === stepId);
+      if (!step) return;
+      if (!step.checks) step.checks = [];
+      step.checks.push({ id: uid(), text, done: false });
+      save();
+      renderSteps();
+    }
+
+    function toggleCheck(stepId, checkId) {
+      const step = steps.find(s => s.id === stepId);
+      if (!step || !step.checks) return;
+      const c = step.checks.find(x => x.id === checkId);
+      if (c) {
+        c.done = !c.done;
+        save();
+        renderSteps();
+      }
+    }
+
+    function removeCheck(stepId, checkId) {
+      const step = steps.find(s => s.id === stepId);
+      if (!step || !step.checks) return;
+      step.checks = step.checks.filter(c => c.id !== checkId);
+      save();
+      renderSteps();
+    }
+
+    function editStepName(id) {
+      const step = steps.find(s => s.id === id);
+      if (!step) return;
+      const name = prompt("Step name:", step.name);
+      if (name === null) return;
+      step.name = name.trim() || step.name;
+      save();
+      renderSteps();
+      updateStatus();
+    }
+
+    function editStepDuration(id) {
+      const step = steps.find(s => s.id === id);
+      if (!step) return;
+      const minStr = prompt("Duration in minutes:", step.minutes);
+      if (minStr === null) return;
+      const n = Number(minStr);
+      if (!Number.isFinite(n) || n < 1) {
+        alert("Enter a number of minutes (1–180).");
+        return;
+      }
+      step.minutes = Math.max(1, Math.min(180, Math.round(n)));
+      save();
+      renderSteps();
+      updateStatus();
+    }
+
+    // ---- Routines ----
+    function saveCurrentAsRoutine() {
+      const name = ($("#newRoutineName").value || "").trim();
+      if (!name) {
+        alert("Enter a name for this routine.");
+        return;
+      }
+      if (!steps.length) {
+        alert("Add at least one step before saving.");
+        return;
+      }
+      // If same name exists, update it
+      const existing = routines.find(r => r.name.toLowerCase() === name.toLowerCase());
+      if (existing) {
+        existing.steps = cloneStepsForSave(steps);
+        activeRoutineId = existing.id;
+        activeRoutineName = existing.name;
+      } else {
+        const r = {
+          id: uid(),
+          name,
+          steps: cloneStepsForSave(steps)
+        };
+        routines.push(r);
+        activeRoutineId = r.id;
+        activeRoutineName = r.name;
+      }
+      $("#newRoutineName").value = "";
+      save();
+      renderRoutines();
+      renderSteps();
+    }
+
+    function loadRoutine(id) {
+      const r = routines.find(x => x.id === id);
+      if (!r) return;
+      steps = stepsFromSaved(r.steps);
+      activeRoutineId = r.id;
+      activeRoutineName = r.name;
+      notifiedStartPrep = false;
+      notifiedLeave = false;
+      save();
+      renderRoutines();
+      renderSteps();
+      updateStatus();
+    }
+
+    function overwriteRoutine(id) {
+      const r = routines.find(x => x.id === id);
+      if (!r) return;
+      if (!steps.length) {
+        alert("Current steps are empty.");
+        return;
+      }
+      if (!confirm(`Update “${r.name}” with the current steps?`)) return;
+      r.steps = cloneStepsForSave(steps);
+      activeRoutineId = r.id;
+      activeRoutineName = r.name;
+      save();
+      renderRoutines();
+      renderSteps();
+    }
+
+    function deleteRoutine(id) {
+      const r = routines.find(x => x.id === id);
+      if (!r) return;
+      if (!confirm(`Delete routine “${r.name}”?`)) return;
+      routines = routines.filter(x => x.id !== id);
+      if (activeRoutineId === id) {
+        activeRoutineId = null;
+        activeRoutineName = "Untitled";
+      }
+      save();
+      renderRoutines();
+      renderSteps();
+    }
+
+    const templates = {
+      morning: [
+        { name: "Wake & stretch", minutes: 5, checks: ["Water", "Open curtains"] },
+        { name: "Shower / wash", minutes: 12, checks: [] },
+        { name: "Get dressed", minutes: 8, checks: ["Clothes laid out"] },
+        { name: "Breakfast / coffee", minutes: 15, checks: [] },
+        { name: "Final check", minutes: 5, checks: ["Phone", "Wallet", "Keys", "Bag"] }
+      ],
+      gym: [
+        { name: "Change into gym clothes", minutes: 5, checks: ["Shoes", "Socks"] },
+        { name: "Pack bag", minutes: 5, checks: ["Water bottle", "Headphones", "Towel", "Lock"] },
+        { name: "Pre-workout / snack", minutes: 5, checks: [] },
+        { name: "Final check", minutes: 3, checks: ["Phone", "Keys", "Membership"] }
+      ],
+      work: [
+        { name: "Shower", minutes: 12, checks: [] },
+        { name: "Get dressed", minutes: 10, checks: ["Outfit ready"] },
+        { name: "Breakfast", minutes: 12, checks: [] },
+        { name: "Gather work items", minutes: 5, checks: ["Laptop", "Charger", "Badge", "Lunch"] },
+        { name: "Final check", minutes: 3, checks: ["Phone", "Wallet", "Keys"] }
+      ],
+      class: [
+        { name: "Get dressed", minutes: 8, checks: [] },
+        { name: "Pack bag", minutes: 7, checks: ["Laptop", "Charger", "Notebook", "Pens"] },
+        { name: "Quick food", minutes: 8, checks: [] },
+        { name: "Final check", minutes: 3, checks: ["Phone", "Student ID", "Keys", "Headphones"] }
+      ],
+      bed: [
+        { name: "Screens off / wind down", minutes: 15, checks: ["Phone on charge", "Alarm set"] },
+        { name: "Hygiene", minutes: 10, checks: ["Brush teeth", "Wash face"] },
+        { name: "Tomorrow prep", minutes: 5, checks: ["Clothes out", "Bag by door"] },
+        { name: "Lights out buffer", minutes: 5, checks: [] }
+      ]
+    };
+
+    function applyTemplate(key) {
+      if (key === "clear") {
+        if (!confirm("Clear all current steps?")) return;
+        steps = [];
+        activeRoutineId = null;
+        activeRoutineName = "Untitled";
+      } else {
+        const t = templates[key];
+        if (!t) return;
+        steps = stepsFromSaved(t);
+        activeRoutineId = null;
+        activeRoutineName = key === "morning" ? "Morning out"
+          : key === "gym" ? "Gym"
+          : key === "work" ? "Work"
+          : key === "class" ? "College class"
+          : key === "bed" ? "Going to bed"
+          : "Untitled";
+      }
+      notifiedStartPrep = false;
+      notifiedLeave = false;
+      save();
+      renderRoutines();
+      renderSteps();
+      updateStatus();
+    }
+
+    // ---- Events ----
+    $("#addStepBtn").addEventListener("click", () => {
+      addStep($("#newStepName").value, $("#newStepMin").value);
+      $("#newStepName").value = "";
+      $("#newStepMin").value = "10";
+      $("#newStepName").focus();
+    });
+
+    $("#newStepName").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        $("#addStepBtn").click();
+      }
+    });
+
+    $("#saveRoutineBtn").addEventListener("click", saveCurrentAsRoutine);
+    $("#newRoutineName").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        saveCurrentAsRoutine();
+      }
+    });
+
+    function onTimeInputsChange() {
+      arrivalTimeStr = $("#arrivalTime").value;
+      travelMin = Number($("#travelMin").value) || 0;
+      bufferMin = Number($("#bufferMin").value) || 0;
+      notifiedStartPrep = false;
+      notifiedLeave = false;
+      save();
+      updateStatus();
+    }
+
+    $("#arrivalTime").addEventListener("change", onTimeInputsChange);
+    $("#travelMin").addEventListener("change", onTimeInputsChange);
+    $("#bufferMin").addEventListener("change", onTimeInputsChange);
+
+    $("#stepsList").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) {
+        const checkItem = e.target.closest(".check-item");
+        if (checkItem && e.target.type === "checkbox") {
+          toggleCheck(checkItem.dataset.step, checkItem.dataset.check);
+        }
+        return;
+      }
+      const stepEl = btn.closest(".step");
+      if (!stepEl) return;
+      const id = stepEl.dataset.id;
+      const action = btn.dataset.action;
+      if (action === "delete") deleteStep(id);
+      else if (action === "edit") editStepName(id);
+      else if (action === "edit-duration") editStepDuration(id);
+      else if (action === "up") moveStep(id, -1);
+      else if (action === "down") moveStep(id, 1);
+      else if (action === "remove-check") {
+        const checkItem = btn.closest(".check-item");
+        if (checkItem) removeCheck(checkItem.dataset.step, checkItem.dataset.check);
+      }
+    });
+
+    $("#stepsList").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.target.matches(".add-check input")) {
+        e.preventDefault();
+        addCheck(e.target.dataset.step, e.target.value);
+        e.target.value = "";
+      }
+    });
+
+    $("#routinesList").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-raction]");
+      if (!btn) return;
+      const item = btn.closest(".routine-item");
+      if (!item) return;
+      const id = item.dataset.rid;
+      const action = btn.dataset.raction;
+      if (action === "load") loadRoutine(id);
+      else if (action === "overwrite") overwriteRoutine(id);
+      else if (action === "delete") deleteRoutine(id);
+    });
+
+    $$("[data-template]").forEach(btn => {
+      btn.addEventListener("click", () => applyTemplate(btn.dataset.template));
+    });
+
+    $("#resetChecksBtn").addEventListener("click", () => {
+      resetChecklists();
+      lastSavedDate = todayKey();
+      save();
+      renderSteps();
+      updateStatus();
+    });
+
+    $("#startBtn").addEventListener("click", () => {
+      if (!parseTimeTodayOrTomorrow($("#arrivalTime").value)) {
+        alert("Set an arrival time first.");
+        return;
+      }
+      if (!steps.length) {
+        alert("Add at least one prep step or load a routine.");
+        return;
+      }
+      updateStatus();
+      $("#statusBox").scrollIntoView({ behavior: "smooth", block: "center" });
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    });
+
+    function startTicking() {
+      if (tickInterval) clearInterval(tickInterval);
+      tickInterval = setInterval(updateStatus, 1000);
+    }
+
+    load();
+    renderRoutines();
+    renderSteps();
+    updateStatus();
+    startTicking();
+
+    if (!$("#arrivalTime").value) {
+      const d = new Date(Date.now() + 60 * 60 * 1000);
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      $("#arrivalTime").value = `${hh}:${mm}`;
+      arrivalTimeStr = `${hh}:${mm}`;
+      save();
+      updateStatus();
+    }
+  </script>
+</body>
+</html>
